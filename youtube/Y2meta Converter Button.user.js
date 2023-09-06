@@ -42,4 +42,97 @@
 // @connect     self
 // @connect     *
 // ==/UserScript==
-var MaxMain={oXHttpReq:null,vid:null,oldUrl:null,DocOnLoad:function(o){try{if(null!=o&&null!=o.body&&null!=o.location&&(MaxMain.vid=MaxMain.getVid(o),MaxMain.vid)){o.querySelector("#info-contents #info").setAttribute("style","flex-wrap: wrap;");var t=o.querySelector("#menu-container"),e=o.querySelector("#y2metaconverter"),n=MaxMain.GetCommandButton();null==e&&(null!=t?t.parentNode.insertBefore(n,t):(t=o.querySelector("#eow-title")).parentNode.insertBefore(n,t)),MaxMain.oldUrl=o.location.href,MaxMain.checkChangeVid()}return!0}catch(o){console.log("Ошибка в функции Y2meta.DocOnLoad. ",o)}},checkChangeVid:function(){setTimeout(function(){MaxMain.oldUrl==window.location.href?MaxMain.checkChangeVid():MaxMain.WaitLoadDom(window.document)},1e3)},WaitLoadDom:function(o){MaxMain.vid=MaxMain.getVid(o),MaxMain.vid?null!=o.querySelector("#info #menu-container")?MaxMain.DocOnLoad(o):setTimeout(function(){MaxMain.WaitLoadDom(o)},1e3):MaxMain.checkChangeVid()},goToY2meta:function(o){try{var t="https://y2meta.com/youtube/"+MaxMain.vid+"/?utm_source=chrome_addon";window.open(t,"_blank")}catch(o){console.log("Ошибка в функции Y2meta.OnButtonClick. ",o)}},GetCommandButton:function(){try{var o=document.createElement("button");return o.id="y2metaconverter",o.className="yt-uix-tooltip",o.setAttribute("type","button"),o.setAttribute("title","Download with y2meta.com"),o.innerHTML="Download",o.addEventListener("click",function(o){MaxMain.goToY2meta(o)},!0),o.setAttribute("style","min-height:25px; position:relative; top:1px; cursor: pointer; font: 13px Arial; background: #ff003e; color: #fff; text-transform: uppercase; display: block; padding: 10px 16px; margin: 20px 5px 10px 5px; border: 1px solid #ff0068; border-radius: 2px; font-weight:bold"),o.setAttribute("onmouseover","this.style.backgroundColor='#c10841'"),o.setAttribute("onmouseout","this.style.backgroundColor='#ff003e'"),o}catch(o){console.log("Ошибка в функции Y2meta.GetCommandButton. ",o)}},getVid:function(o){var t=o.location.toString().match(/^.*((m\.)?youtu\.be\/|vi?\/|u\/\w\/|embed\/|\?vi?=|\&vi?=)([^#\&\?]*).*/);return!(!t||!t[3])&&t[3]}};MaxMain.WaitLoadDom(window.document);
+var MaxMain = {
+  oXHttpReq: null,
+  vid: null,
+  oldUrl: null,
+  DocOnLoad: function (o) {
+    try {
+      if (
+        null != o &&
+        null != o.body &&
+        null != o.location &&
+        ((MaxMain.vid = MaxMain.getVid(o)), MaxMain.vid)
+      ) {
+        o.querySelector("#info-contents #info").setAttribute(
+          "style",
+          "flex-wrap: wrap;"
+        );
+        var t = o.querySelector("#above-the-fold #menu"),
+          e = o.querySelector("#y2metaconverter"),
+          n = MaxMain.GetCommandButton();
+        t.parentNode.insertBefore(n, t),
+          (MaxMain.oldUrl = o.location.href),
+          MaxMain.checkChangeVid();
+      }
+      return !0;
+    } catch (o) {
+      console.log("Ошибка в функции Y2meta.DocOnLoad. ", o);
+    }
+  },
+  checkChangeVid: function () {
+    setTimeout(function () {
+      MaxMain.oldUrl == window.location.href
+        ? MaxMain.checkChangeVid()
+        : MaxMain.WaitLoadDom(window.document);
+    }, 1e3);
+  },
+  WaitLoadDom: function (o) {
+    (MaxMain.vid = MaxMain.getVid(o)),
+      MaxMain.vid
+        ? null != o.querySelector("#above-the-fold #menu")
+          ? MaxMain.DocOnLoad(o)
+          : setTimeout(function () {
+              MaxMain.WaitLoadDom(o);
+            }, 1e3)
+        : MaxMain.checkChangeVid();
+  },
+  goToY2meta: function (o) {
+    try {
+      var t =
+        "https://www.y2meta.com/youtube/" +
+        MaxMain.vid +
+        "/?utm_source=chrome_addon";
+      window.open(t, "_blank");
+    } catch (o) {
+      console.log("Ошибка в функции Y2meta.OnButtonClick. ", o);
+    }
+  },
+  GetCommandButton: function () {
+    try {
+      var o = document.createElement("button");
+      return (
+        (o.id = "y2metaconverter"),
+        (o.className = "yt-uix-tooltip"),
+        o.setAttribute("type", "button"),
+        o.setAttribute("title", "Download with y2meta.com"),
+        (o.innerHTML = "Download"),
+        o.addEventListener(
+          "click",
+          function (o) {
+            MaxMain.goToY2meta(o);
+          },
+          !0
+        ),
+        o.setAttribute(
+          "style",
+          "min-height:25px; position:relative; top:1px; cursor: pointer; font: 13px Arial; background: #ff003e; color: #fff; text-transform: uppercase; display: block; padding: 10px 16px; margin: 20px 5px 10px 5px; border: 1px solid #ff0068; border-radius: 2px; font-weight:bold"
+        ),
+        o.setAttribute("onmouseover", "this.style.backgroundColor='#c10841'"),
+        o.setAttribute("onmouseout", "this.style.backgroundColor='#ff003e'"),
+        o
+      );
+    } catch (o) {
+      console.log("Ошибка в функции Y2meta.GetCommandButton. ", o);
+    }
+  },
+  getVid: function (o) {
+    var t = o.location
+      .toString()
+      .match(
+        /^.*((m\.)?youtu\.be\/|vi?\/|u\/\w\/|embed\/|\?vi?=|\&vi?=)([^#\&\?]*).*/
+      );
+    return !(!t || !t[3]) && t[3];
+  },
+};
+MaxMain.WaitLoadDom(window.document);
