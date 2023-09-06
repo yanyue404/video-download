@@ -1,6 +1,6 @@
 # video-download
 
-主流视频站点的下载方式
+主流视频站点的下载方式，推荐 [IDM](https://www.internetdownloadmanager.com/) 多线程下载。
 
 **v.qq.com**
 
