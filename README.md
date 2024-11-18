@@ -23,10 +23,12 @@ B站下载助手 bilibili-helper
 使用两个油猴脚本：Local YouTube Downloader 和 Y2meta Converter Button
 
 - https://y2meta.app/zh-cn34
+- https://youtube-convert.com/
+- https://www.savemp4.cc/
 
 ### 参考
 
 - https://www.v2ex.com/t/1060206#reply39
-- https://youtube-convert.com/
+
 
 
