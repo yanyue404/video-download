@@ -26,9 +26,30 @@ B站下载助手 bilibili-helper
 - https://youtube-convert.com/
 - https://www.savemp4.cc/
 
+翻墙打开视频转换网站：  
+
+网站1：[https://youtube4kdownloader.com](https://youtube4kdownloader.com/) （视频质量最高设置为4k）
+
+网站2：<https://yt5s.biz/zh-cn> （视频质量最高设置为4K）
+
+网站3：<https://ddownr.com/zh/youtube-video-downloader> （视频质量最高设置为4k）
+
+网站4：<https://downmp3.yt/zhCH/youtube-video-downloader> （视频质量最高设置为4k）
+
+网站5：<https://yt1d.com/zh-tw> （视频质量最高设置为4k）
+
+网站6：<https://www.y2mate.com/en858/download-youtube> （视频质量最高设置为1440p）
+
+网站7：<https://9convert.com/zh-tw425> （视频质量最高设置为720p）
+
+网站8：<https://freesave.co/zh-cn/index.html> （视频质量最高设置为4k）
+
+网站9：[https://cobalt.tools](https://cobalt.tools/) （视频质量默认1080p,settings-video-video quality可设置2k、4k清晰度）
+
 ### 参考
 
 - https://www.v2ex.com/t/1060206#reply39
+- https://github.com/Alvin9999/new-pac/wiki/YouTube%E4%B8%8B%E8%BD%BD1080%E6%95%99%E7%A8%8B
 
 
 
