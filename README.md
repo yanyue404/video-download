@@ -18,33 +18,43 @@ B站下载助手 bilibili-helper
 
 **youtube.com**
 
+在线入口（GitHub Pages，聚合下方可用站点）：<https://yanyue404.github.io/video-download/>，源码 `index.html`。
+
 > 测试下载链接： https://www.youtube.com/watch?v=qhH8yP26GfU
 
-使用两个油猴脚本：Local YouTube Downloader 和 Y2meta Converter Button
+翻墙打开视频转换网站（2026-11-11 校对）：  
 
-- https://y2meta.app/zh-cn34
-- https://youtube-convert.com/
-- https://www.savemp4.cc/
+网站1：<https://y2down.cc/zhD8/youtube-mp3> （MP4 最高 4K，音频 MP3 320kbps / M4A / FLAC / WAV 等）
 
-翻墙打开视频转换网站：  
+网站2：<https://ytmp3.gl/> （MP3 / MP4，无需注册，输入框下方 `change to MP4` 切换格式）
 
-网站1：[https://youtube4kdownloader.com](https://youtube4kdownloader.com/) （视频质量最高设置为4k）
+网站3：[https://youtube4kdownloader.com](https://youtube4kdownloader.com/) （视频质量最高设置为4k）
 
-网站2：<https://yt5s.biz/zh-cn> （视频质量最高设置为4K）
+网站4：<https://yt5s.biz/zh-cn> （视频质量最高设置为4K）
 
-网站3：<https://ddownr.com/zh/youtube-video-downloader> （视频质量最高设置为4k）
+网站5：<https://ddownr.com/zh/youtube-video-downloader> （视频质量最高设置为4k）
 
-网站4：<https://downmp3.yt/zhCH/youtube-video-downloader> （视频质量最高设置为4k）
+网站6：<https://downmp3.yt/zhCH/youtube-video-downloader> （视频质量最高设置为4k）
 
-网站5：<https://yt1d.com/zh-tw> （视频质量最高设置为4k）
+网站7：<https://yt1d.com/zh-tw> （视频质量最高设置为4k）
 
-网站6：<https://www.y2mate.com/en858/download-youtube> （视频质量最高设置为1440p）
+网站8：[https://cobalt.tools](https://cobalt.tools/) （视频质量默认1080p,settings-video-video quality可设置2k、4k清晰度）
 
-网站7：<https://9convert.com/zh-tw425> （视频质量最高设置为720p）
+> 已移除：`y2meta.app`（404）、`freesave.co`（跳转到域名停放页）、`youtube-convert.com` / `savemp4.cc` / `y2mate.com` / `9convert.com`（无法访问），以及依赖 y2meta 的油猴脚本 Y2meta Converter Button；Local YouTube Downloader 作者已停更。
 
-网站8：<https://freesave.co/zh-cn/index.html> （视频质量最高设置为4k）
+**自建转换服务**（可选，`server/`）：FastAPI + yt-dlp + ffmpeg，在线入口页的“自建后端”填上地址和口令后可直接转换下载。
 
-网站9：[https://cobalt.tools](https://cobalt.tools/) （视频质量默认1080p,settings-video-video quality可设置2k、4k清晰度）
+```bash
+cd server
+docker build -t video-download .
+docker run -d -p 8000:8000 -e TOKEN=你的口令 -e ALLOW_ORIGIN=https://yanyue404.github.io video-download
+# 接口：GET /convert?url=<YouTube链接>&fmt=mp3|mp4&q=1080  头部 Authorization: Bearer 你的口令
+```
+
+- 需部署在能访问 YouTube 的服务器上，并用 https 反代（Pages 是 https，不能请求 http 接口）。
+- 机房 IP 常被 YouTube 返回 403 或要求登录：挂载 cookies（`-v ./cookies.txt:/app/cookies.txt -e COOKIES_FILE=/app/cookies.txt`）或设置 `-e PROXY=...`；并定期重新 build 以升级 yt-dlp。
+- 仅支持 YouTube 单视频；默认单个最长 120 分钟（`MAX_MINUTES`），同时最多转换 2 个。
+- 测试：`pip install -r requirements.txt httpx pytest; pytest -q`（不联网）。
 
 ## yt-dlp
 

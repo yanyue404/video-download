@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>视频下载入口 - YouTube 转 MP3 / MP4</title>
+<style>
+  :root { --red: #e53935; --bg: #fafafa; --fg: #222; --mute: #777; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 16px/1.6 system-ui, "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--fg); }
+  main { max-width: 640px; margin: 0 auto; padding: 56px 20px; }
+  h1 { text-align: center; margin: 0 0 8px; }
+  .sub { text-align: center; color: var(--mute); margin: 0 0 32px; }
+  form { display: flex; gap: 8px; }
+  input { flex: 1; min-width: 0; padding: 14px; font-size: 16px; border: 2px solid #ddd; border-radius: 8px; }
+  input:focus { outline: none; border-color: var(--red); }
+  button, .go { padding: 14px 24px; font-size: 16px; color: #fff; background: var(--red); border: 0; border-radius: 8px; cursor: pointer; text-decoration: none; }
+  .fmt { text-align: center; margin: 12px 0 0; color: var(--mute); }
+  .fmt a { color: var(--red); cursor: pointer; text-decoration: underline; }
+  #msg { margin: 16px 0 0; text-align: center; min-height: 1.6em; }
+  #msg.err { color: var(--red); }
+  ul { list-style: none; padding: 0; margin: 16px 0 0; }
+  li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 16px; margin-bottom: 8px; background: #fff; border: 1px solid #eee; border-radius: 8px; }
+  li small { display: block; color: var(--mute); }
+  .go { padding: 8px 16px; font-size: 14px; white-space: nowrap; }
+  button:disabled { opacity: .6; cursor: wait; }
+  #q { margin-left: 8px; padding: 2px 6px; }
+  details { margin-top: 24px; color: var(--mute); font-size: 14px; }
+  details input { display: block; width: 100%; margin-top: 8px; padding: 8px; font-size: 14px; }
+  footer { margin-top: 40px; text-align: center; color: var(--mute); font-size: 13px; }
+  footer a { color: inherit; }
+</style>
+</head>
+<body>
+<main>
+  <h1>YouTube 转 MP3 / MP4</h1>
+  <p class="sub">粘贴链接，选好格式，挑一个可用站点继续。</p>
+
+  <form id="f">
+    <input id="url" placeholder="粘贴 YouTube 链接" autocomplete="off" autofocus>
+    <button>转换</button>
+  </form>
+  <p class="fmt">格式：<b id="fmt">MP3</b>（<a id="sw">切换为 MP4</a>）<select id="q" hidden>
+    <option value="2160">4K</option><option value="1440">2K</option>
+    <option value="1080" selected>1080p</option><option value="720">720p</option><option value="480">480p</option>
+  </select></p>
+  <p id="msg"></p>
+  <ul id="sites" hidden></ul>
+
+  <details>
+    <summary>自建后端（可选，填了就直接转换下载，不填则跳转第三方站点）</summary>
+    <input id="api" placeholder="后端地址，如 https://vd.example.com" autocomplete="off">
+    <input id="token" type="password" placeholder="访问口令 TOKEN" autocomplete="off">
+  </details>
+
+  <footer>
+    本页只做跳转，不处理、不存储任何视频。请仅下载你有权下载的内容。
+    <br>站点清单见 <a href="https://github.com/yanyue404/video-download#readme">README</a>，需要翻墙访问。
+  </footer>
+</main>
+
+<script>
+// 站点清单与 README 保持一致；站点失效时同步改这里。
+const SITES = [
+  { name: "y2down.cc",  url: "https://y2down.cc/zhD8/youtube-mp3",                note: "MP4 最高 4K，MP3 320kbps" },
+  { name: "ytmp3.gl",   url: "https://ytmp3.gl/",                                 note: "MP3 / MP4，无需注册" },
+  { name: "ddownr.com", url: "https://ddownr.com/zh/youtube-video-downloader",    note: "最高 4K" },
+  { name: "yt5s.biz",   url: "https://yt5s.biz/zh-cn",                            note: "最高 4K，MP3 320kbps" },
+  { name: "downmp3.yt", url: "https://downmp3.yt/zhCH/youtube-video-downloader",  note: "最高 4K" },
+  { name: "yt1d.com",   url: "https://yt1d.com/zh-tw",                            note: "最高 4K" },
+  { name: "youtube4kdownloader.com", url: "https://youtube4kdownloader.com",      note: "最高 4K" },
+  { name: "cobalt.tools", url: "https://cobalt.tools",                            note: "默认 1080p，设置里可调 2K/4K" },
+];
+
+// 返回规范化的 watch 链接；不是 YouTube 视频链接则返回 null。
+function parseYouTube(text) {
+  let u;
+  try { u = new URL(text.trim()); } catch { return null; }
+  const host = u.hostname.replace(/^(www|m|music)\./, "");
+  let id = null;
+  if (host === "youtu.be") id = u.pathname.slice(1);
+  else if (host === "youtube.com") {
+    id = u.pathname === "/watch" ? u.searchParams.get("v")
+       : (u.pathname.match(/^\/(?:shorts|embed|live)\/([^/?]+)/) || [])[1];
+  }
+  return /^[\w-]{11}$/.test(id || "") ? "https://www.youtube.com/watch?v=" + id : null;
+}
+
+const $ = id => document.getElementById(id);
+let fmt = "MP3";
+
+$("api").value = localStorage.vdApi || "";
+$("token").value = localStorage.vdToken || "";
+$("api").onchange = $("token").onchange = () => {
+  localStorage.vdApi = $("api").value.trim();
+  localStorage.vdToken = $("token").value;
+};
+
+$("sw").onclick = () => {
+  fmt = fmt === "MP3" ? "MP4" : "MP3";
+  $("fmt").textContent = fmt;
+  $("sw").textContent = "切换为 " + (fmt === "MP3" ? "MP4" : "MP3");
+  $("q").hidden = fmt === "MP3";
+};
+
+// 备选：复制链接并列出第三方站点
+async function showSites(link, prefix) {
+  let copied = false;
+  try { await navigator.clipboard.writeText(link); copied = true; } catch {}
+  $("msg").textContent = prefix + (copied ? "链接已复制，" : "") + "打开站点后粘贴，并选择 " + fmt + "：";
+  $("sites").innerHTML = SITES.map(s =>
+    `<li><span>${s.name}<small>${s.note}</small></span><a class="go" href="${s.url}" target="_blank" rel="noopener">打开</a></li>`
+  ).join("");
+  $("sites").hidden = false;
+}
+
+// 走自建后端：下载到内存再保存，这样失败时能显示原因（大文件占内存，够个人用）
+async function viaApi(link, api) {
+  const qs = new URLSearchParams({ url: link, fmt: fmt.toLowerCase(), q: $("q").value });
+  const r = await fetch(api.replace(/\/+$/, "") + "/convert?" + qs, {
+    headers: { Authorization: "Bearer " + $("token").value },
+  });
+  if (!r.ok) throw new Error(((await r.json().catch(() => ({}))).detail) || "HTTP " + r.status);
+  const cd = r.headers.get("Content-Disposition") || "";
+  const name = decodeURIComponent((cd.match(/filename\*=utf-8''([^;]+)/i) || [])[1] || "") ||
+    (cd.match(/filename="([^"]+)"/) || [])[1] || "video." + fmt.toLowerCase();
+  const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(await r.blob()), download: name });
+  a.click();
+  URL.revokeObjectURL(a.href);
+  return name;
+}
+
+$("f").onsubmit = async e => {
+  e.preventDefault();
+  const link = parseYouTube($("url").value), msg = $("msg"), btn = e.target.querySelector("button");
+  const api = $("api").value.trim();
+  msg.className = ""; $("sites").hidden = true;
+  if (!link) { msg.className = "err"; msg.textContent = "请输入有效的 YouTube 视频链接"; return; }
+  if (!api) return showSites(link, "");
+
+  btn.disabled = true; msg.textContent = "转换中，请稍候（长视频可能要几分钟）…";
+  try {
+    msg.textContent = "已保存：" + await viaApi(link, api);
+  } catch (err) {
+    msg.className = "err";
+    showSites(link, "后端转换失败（" + err.message + "），改用第三方站点：");
+  } finally {
+    btn.disabled = false;
+  }
+};
+</script>
+</body>
+</html>
